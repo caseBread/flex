@@ -1,7 +1,14 @@
 export type RefreshTokenAdapterOptions<T, U> = {
-  refreshTokenFetcher: (input: T) => Promise<U>;
+  /**
+   * Refresh Token을 사용하여 새로운 Access Token(또는 인증 객체)을
+   * 발급하는 비동기 함수입니다.
+   */
+  refreshTokenFetcher: (input?: T) => Promise<U>;
 
-  fetcherInput: T;
+  /**
+   * refreshTokenFetcher 함수에 전달될 입력값입니다.
+   */
+  fetcherInput?: T;
 
   /**
    * 캐시된 엑세스 토큰의 최대 유지 시간입니다. (단위: ms)
@@ -21,7 +28,7 @@ export type RefreshTokenAdapterOptions<T, U> = {
 /**
  * Refresh Token을 구현하기 위한 어댑터입니다.
  */
-export class RefreshTokenAdapter<T, U> {
+export class RefreshTokenAdapter<T = void, U = void> {
   private cachedObject: U | null = null;
   private queue: Array<[(value: U) => void, (reason?: any) => void]> = [];
   private isFetching = false;
@@ -30,7 +37,7 @@ export class RefreshTokenAdapter<T, U> {
     T,
     U
   >["refreshTokenFetcher"];
-  private fetcherInput: T;
+  private fetcherInput?: T;
   private cacheMaxAge: number;
   private timeout: number;
   private timeoutHandler: ReturnType<typeof setTimeout> | null = null;
@@ -45,7 +52,7 @@ export class RefreshTokenAdapter<T, U> {
   /**
    * 토큰을 갱신하고, 갱신된 토큰을 반환합니다.
    */
-  async getRefreshedAccessToken(error?: unknown) {
+  async getRefreshedAccessToken() {
     // 토큰이 캐시되어 있다면, 캐시된 토큰을 반환합니다.
     if (!!this.cachedObject) return this.cachedObject;
 
@@ -73,7 +80,7 @@ export class RefreshTokenAdapter<T, U> {
         const promise = this.refreshTokenFetcher(this.fetcherInput);
 
         this.timeoutHandler = setTimeout(() => {
-          rejectWrapper(error ?? "토큰 갱신 요청 시간 초과");
+          rejectWrapper("토큰 갱신 요청 시간 초과");
         }, this.timeout);
 
         const newToken = await promise;

@@ -23,14 +23,6 @@ const CustomApp = (
 CustomApp.getInitialProps = async (
   appContext: AppContext
 ): Promise<AppInitialProps | {}> => {
-  const { ctx } = appContext;
-
-  if (ctx.res && ctx.res.writableEnded) {
-    // When redirecting, the response is finished.
-    // No point in continuing to render
-    return {};
-  }
-
   const pageGetInitialProps = await App.getInitialProps(appContext);
 
   return {

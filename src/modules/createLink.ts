@@ -8,49 +8,25 @@ import {
 import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { sha256 } from "crypto-hash";
 import { RefreshTokenAdapter } from "./refreshTokenAdapter";
+import { CLIENT_BASE_URL } from "@/constants/URL";
 
-type GetRestoreAuthToken = {
-  apiBaseUrl: string;
-  clientBaseUrl: string;
-  refreshToken: string;
-};
-
-const getRestoreAuthToken = async ({
-  apiBaseUrl,
-  clientBaseUrl,
-  refreshToken,
-}: GetRestoreAuthToken): Promise<{
+const getRestoreAuthToken = async (): Promise<{
   accessToken: string;
-  refreshToken: string;
 }> => {
-  const response = await fetch(`${apiBaseUrl}/auth/token/refresh-token`, {
+  const response = await fetch(`${CLIENT_BASE_URL}/api/auth/refresh`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
     },
-    body: JSON.stringify({ token: refreshToken }),
   });
 
-  const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-    await response.json();
+  const { accessToken: newAccessToken } = await response.json();
 
-  if (!newAccessToken || !newRefreshToken) {
-    throw new Error("token refresh failed");
+  if (!newAccessToken) {
+    throw new Error("로그아웃");
   }
 
-  // 로그인토큰을 쿠키에 추가
-  await fetch(`${clientBaseUrl}/api/tokens`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-    }),
-  });
-
-  return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+  return { accessToken: newAccessToken };
 };
 
 type CreateLink = {
@@ -65,15 +41,10 @@ export const createLink = ({
   cookies,
 }: CreateLink): ApolloLink => {
   const refreshTokenAdapter = new RefreshTokenAdapter<
-    GetRestoreAuthToken,
-    { accessToken: string; refreshToken: string }
+    void,
+    { accessToken: string }
   >({
     refreshTokenFetcher: getRestoreAuthToken,
-    fetcherInput: {
-      apiBaseUrl,
-      clientBaseUrl,
-      refreshToken: cookies.refreshToken,
-    },
   });
 
   const errorLink = onError(({ forward, operation, networkError }) => {
@@ -86,10 +57,7 @@ export const createLink = ({
         let subscription: ObservableSubscription;
 
         void refreshTokenAdapter
-          .getRefreshedAccessToken({
-            apiHost: apiBaseUrl,
-            refreshToken: cookies.refreshToken,
-          })
+          .getRefreshedAccessToken()
           .then(async (response) => {
             operation.setContext({
               headers: {

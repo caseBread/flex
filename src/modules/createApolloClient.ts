@@ -1,8 +1,6 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { createLink } from "./createLink";
-
-const CLIENT_BASE_URL = "https://client.example.com";
-const API_BASE_URL = "https://example.api.com";
+import { API_BASE_URL, CLIENT_BASE_URL } from "@/constants/URL";
 
 type CreateApolloClient = {
   cookies: Record<string, string>;
