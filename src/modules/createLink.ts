@@ -100,7 +100,7 @@ export const createLink = ({
   });
 
   const httpLink = new HttpLink({
-    uri: `${apiBaseUrl}/graphql`,
+    uri: `${apiBaseUrl}/api/graphql`,
     headers: {
       ...(cookies.accessToken && {
         Authorization: `Bearer ${cookies.accessToken}`,
