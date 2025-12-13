@@ -9,7 +9,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   res.setHeader("Cache-Control", "private, no-cache, no-store");
 
-  const currentHost = req?.headers?.host ?? "";
   const cookies = parseCookies({ req });
   const { accessToken, refreshToken } = cookies;
 
@@ -19,8 +18,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   res.setHeader("Set-Cookie", [
-    `accessToken=; Domain=${currentHost}; Max-Age=0; Path=/; Secure; SameSite=Lax;`,
-    `refreshToken=; Domain=${currentHost}; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=Lax;`,
+    `accessToken=; Max-Age=0; Path=/; Secure; SameSite=Lax;`,
+    `refreshToken=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=Lax;`,
   ]);
   res.status(200).json({ message: "Cookies deleted" });
 }

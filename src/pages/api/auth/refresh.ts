@@ -4,7 +4,6 @@ import { parseCookies } from "nookies";
 
 type SetAuthTokenCookieProps = {
   response: NextApiResponse;
-  host: string;
   accessToken?: string;
   refreshToken?: string;
 };
@@ -14,7 +13,6 @@ type SetAuthTokenCookieProps = {
  */
 export const setAuthTokenCookie = ({
   response,
-  host,
   accessToken,
   refreshToken,
 }: SetAuthTokenCookieProps) => {
@@ -23,14 +21,14 @@ export const setAuthTokenCookie = ({
   if (accessToken) {
     cookieHeader.push(
       // Q : SameSite는 왜넣었나요? A : 기본값이 Lax가 아닌 브라우저가 있어서 https://caniuse.com/?search=samesite
-      `accessToken=${accessToken}; Domain=${host}; Max-Age=${
+      `accessToken=${accessToken}; Max-Age=${
         7 * 24 * 60 * 60
       }; Path=/; Secure; SameSite=Lax;`
     );
   }
   if (refreshToken) {
     cookieHeader.push(
-      `refreshToken=${refreshToken}; Domain=${host}; Max-Age=${
+      `refreshToken=${refreshToken}; Max-Age=${
         7 * 24 * 60 * 60
       }; Path=/; Secure; HttpOnly; SameSite=Lax;`
     );
@@ -50,7 +48,6 @@ export default async function handler(
 
   res.setHeader("Cache-Control", "private, no-cache, no-store");
 
-  const currentHost = req?.headers?.host ?? "";
   const cookies = parseCookies({ req });
 
   // 백엔드 Token Refresh API
@@ -73,7 +70,6 @@ export default async function handler(
 
   setAuthTokenCookie({
     response: res,
-    host: currentHost,
     accessToken: newAccessToken,
     refreshToken: newRefreshToken,
   });
