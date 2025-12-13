@@ -1,6 +1,41 @@
-import '@/styles/globals.css'
-import type { AppProps } from 'next/app'
+import App, { AppContext, AppInitialProps, AppProps } from "next/app";
+import { useApollo } from "../modules/apolloClient";
+import { ApolloProvider } from "@apollo/client";
 
-export default function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
-}
+const CustomApp = (
+  appProps: {
+    currentHost: string;
+  } & AppProps
+) => {
+  const { Component, pageProps } = appProps;
+
+  const { client: apolloClient } = useApollo({
+    pageProps,
+  });
+
+  return (
+    <ApolloProvider client={apolloClient}>
+      <Component {...pageProps} />
+    </ApolloProvider>
+  );
+};
+
+CustomApp.getInitialProps = async (
+  appContext: AppContext
+): Promise<AppInitialProps | {}> => {
+  const { ctx } = appContext;
+
+  if (ctx.res && ctx.res.writableEnded) {
+    // When redirecting, the response is finished.
+    // No point in continuing to render
+    return {};
+  }
+
+  const pageGetInitialProps = await App.getInitialProps(appContext);
+
+  return {
+    ...pageGetInitialProps,
+  };
+};
+
+export default CustomApp;
