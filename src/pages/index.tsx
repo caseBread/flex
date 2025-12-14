@@ -7,7 +7,7 @@
  * ─────────────────────────────────────────────
  * 상단 상태 값 (isLogined / userId / role)
  *
- * 페이지 상단에 표시되는 세 가지 값은 각각 서로 다른 GraphQL API를 호출하며,
+ * 페이지 상단에 표시되는 세 가지 값은 각각 서로 다른 API를 호출하며,
  * 하나의 페이지에서 여러 개의 API 요청이 동시에 발생하는 상황을 가정합니다.
  *
  * 이를 통해 다음과 같은 시나리오를 테스트합니다.
@@ -35,23 +35,10 @@
  *      정상적으로 재발급(갱신)되는지 확인합니다.
  *
  */
-import { GetServerSideProps } from "next";
-import { getCommonServerSideProps } from "@/modules/serverSideProps";
-import { addApolloState } from "@/modules/apolloClient";
 import { CLIENT_BASE_URL } from "@/constants/URL";
 import { useIsLoginedQuery } from "@/hooks/useIsLoginedQuery";
 import { useRoleQuery } from "@/hooks/useRoleQuery";
 import { useUserIdQuery } from "@/hooks/useUserIdQuery";
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { apolloClient } = await getCommonServerSideProps(ctx);
-
-  const originPageProps = {
-    props: {},
-  };
-
-  return addApolloState(apolloClient, originPageProps);
-};
 
 export default function Home() {
   const testQuery1 = useIsLoginedQuery();

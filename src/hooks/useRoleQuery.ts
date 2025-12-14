@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const ROLE_ENDPOINT = "/api/auth/role";
 
-const fetchRole = async () => {
+const fetchData = async () => {
   const res = await api.get<{ role: string | null }>({
     path: ROLE_ENDPOINT,
   });
@@ -14,6 +14,6 @@ const fetchRole = async () => {
 export const useRoleQuery = () => {
   return useQuery({
     queryKey: [ROLE_ENDPOINT],
-    queryFn: fetchRole,
+    queryFn: fetchData,
   });
 };

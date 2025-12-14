@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const USER_ID_ENDPOINT = "/api/auth/user-id";
 
-const fetchUserId = async () => {
+const fetchData = async () => {
   const res = await api.get<{ userId: string | null }>({
     path: USER_ID_ENDPOINT,
   });
@@ -14,6 +14,6 @@ const fetchUserId = async () => {
 export const useUserIdQuery = () => {
   return useQuery({
     queryKey: [USER_ID_ENDPOINT],
-    queryFn: fetchUserId,
+    queryFn: fetchData,
   });
 };
