@@ -109,24 +109,44 @@ export default function Home() {
         </>
       )}
 
-      <button
-        onClick={handleLogin}
-        style={{ marginTop: 12, marginRight: 8, padding: "6px 12px" }}
+      <fieldset
+        style={{
+          marginTop: 48,
+          padding: 16,
+          border: "1px solid #ccc",
+          borderRadius: 8,
+        }}
       >
-        로그인 (토큰 발급)
-      </button>
-      <button
-        onClick={handleLogout}
-        style={{ marginTop: 12, marginRight: 8, padding: "6px 12px" }}
-      >
-        로그아웃 (토큰 삭제)
-      </button>
-      <button
-        onClick={handleCorruptAccessToken}
-        style={{ marginTop: 12, marginRight: 8, padding: "6px 12px" }}
-      >
-        accessToken 만료시키기
-      </button>
+        <legend
+          style={{
+            padding: "0 8px",
+            fontWeight: 600,
+          }}
+        >
+          테스트 버튼
+        </legend>
+
+        <button
+          onClick={handleLogin}
+          style={{ marginRight: 8, padding: "6px 12px" }}
+        >
+          로그인 (토큰 발급)
+        </button>
+
+        <button
+          onClick={handleLogout}
+          style={{ marginRight: 8, padding: "6px 12px" }}
+        >
+          로그아웃 (토큰 삭제)
+        </button>
+
+        <button
+          onClick={handleCorruptAccessToken}
+          style={{ padding: "6px 12px" }}
+        >
+          accessToken 만료
+        </button>
+      </fieldset>
     </main>
   );
 }
