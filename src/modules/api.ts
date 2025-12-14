@@ -40,6 +40,8 @@ client.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+let isLoggedOut = false;
+
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -52,9 +54,10 @@ client.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${response.accessToken}`;
         })
         .catch(async (err) => {
-          await fetch(`${CLIENT_BASE_URL}/api/tokens`, {
-            method: "DELETE",
-          });
+          if (!isLoggedOut) {
+            isLoggedOut = true;
+            await fetch("/api/tokens", { method: "DELETE" });
+          }
 
           originalRequest.headers.Authorization = ``;
         });

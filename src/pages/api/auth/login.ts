@@ -10,6 +10,8 @@ export default async function handler(
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
+  res.setHeader("Cache-Control", "private, no-cache, no-store");
+
   try {
     const loginRes = await fetch(`${API_BASE_URL}/api/token/login`, {
       headers: {
