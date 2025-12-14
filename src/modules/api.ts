@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { buildQuery } from "@/utils/buildQuery";
 import { RefreshTokenAdapter } from "./refreshTokenAdapter";
 import { getRestoreAuthToken } from "./getRestoreAuthToken";
-import { API_BASE_URL, CLIENT_BASE_URL } from "@/constants/URL";
+import { API_BASE_URL } from "@/constants/URL";
 import nookies from "nookies";
 
 type RequestOptions = {
