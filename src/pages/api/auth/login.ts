@@ -11,7 +11,6 @@ export default async function handler(
   }
 
   try {
-    // 1️⃣ 내부 로그인 API 호출 (input 없음)
     const loginRes = await fetch(`${API_BASE_URL}/api/token/login`, {
       headers: {
         "Content-Type": "application/json",
@@ -24,7 +23,6 @@ export default async function handler(
 
     const { accessToken, refreshToken } = await loginRes.json();
 
-    // 2️⃣ 쿠키 세팅
     const cookieHeader: string[] = [];
 
     if (accessToken) {
@@ -46,7 +44,6 @@ export default async function handler(
     res.setHeader("Set-Cookie", cookieHeader);
     res.setHeader("Cache-Control", "private, no-cache, no-store");
 
-    // 3️⃣ 프론트에는 성공만 알려줌
     return res.status(200).json({ success: true });
   } catch (e) {
     return res.status(500).json({ message: "internal server error" });
