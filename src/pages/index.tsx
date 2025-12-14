@@ -83,7 +83,7 @@ export default function Home() {
   const testQuery3 = useQuery(Q_ROLE, { fetchPolicy: "no-cache" });
 
   const handleLogin = async (): Promise<void> => {
-    await fetch("/api/auth/login", {
+    await fetch(`${CLIENT_BASE_URL}/api/auth/login`, {
       method: "POST",
     });
 
@@ -93,9 +93,6 @@ export default function Home() {
   const handleLogout = async (): Promise<void> => {
     await fetch(`${CLIENT_BASE_URL}/api/tokens`, {
       method: "DELETE",
-      headers: {
-        "content-type": "application/json",
-      },
     });
 
     window.location.reload();
