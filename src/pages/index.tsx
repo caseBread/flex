@@ -2,7 +2,7 @@ import { GetServerSidePropsContext } from "next";
 import { getCommonServerSideProps } from "@/modules/serverSideProps";
 import { addApolloState } from "@/modules/apolloClient";
 import gql from "graphql-tag";
-import { useQuery } from "@apollo/client";
+import { useApolloClient, useQuery } from "@apollo/client";
 
 export const document = gql`
   query GetIsLogined {
@@ -23,21 +23,15 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 };
 
 export default function Home() {
+  const client = useApolloClient();
   const { data, loading, error, refetch } = useQuery(document);
 
   const login = async () => {
-    const res = await fetch("/api/auth/login", {
+    await fetch("/api/auth/login", {
       method: "POST",
     });
 
-    const { accessToken, refreshToken } = await res.json();
-
-    // ✅ 가장 단순한 방식
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("refreshToken", refreshToken);
-
-    // 토큰 저장 후 GraphQL 다시 호출
-    await refetch();
+    await client.reFetchObservableQueries();
   };
 
   if (loading) return <main>Loading...</main>;

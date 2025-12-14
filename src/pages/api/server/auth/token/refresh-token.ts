@@ -1,5 +1,5 @@
-import { signAccessToken, signRefreshToken, verifyToken } from "@/libs/jwt";
 import type { NextApiRequest, NextApiResponse } from "next";
+import jwt from "jsonwebtoken";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -28,4 +28,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   } catch {
     return res.status(401).json({ message: "invalid or expired token" });
   }
+}
+
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-me";
+
+export function signAccessToken() {
+  return jwt.sign({ sub: "test-user", type: "access" }, JWT_SECRET, {
+    expiresIn: "10m",
+  });
+}
+
+export function signRefreshToken() {
+  return jwt.sign({ sub: "test-user", type: "refresh" }, JWT_SECRET, {
+    expiresIn: "7d",
+  });
+}
+
+export function verifyToken(token: string) {
+  return jwt.verify(token, JWT_SECRET);
 }

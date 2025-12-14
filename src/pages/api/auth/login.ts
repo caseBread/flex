@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/constants/URL";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -11,17 +12,11 @@ export default async function handler(
 
   try {
     // 1️⃣ 내부 로그인 API 호출 (input 없음)
-    const loginRes = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"
-      }/api/server/auth/token/login`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log(loginRes);
+    const loginRes = await fetch(`${API_BASE_URL}/api/token/login`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!loginRes.ok) {
       return res.status(500).json({ message: "login api failed" });
