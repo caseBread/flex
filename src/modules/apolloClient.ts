@@ -7,17 +7,16 @@ import nookies from "nookies";
 const APOLLO_STATE_PROP_NAME = "__APOLLO_STATE__";
 
 let CLIENT: ApolloClient<NormalizedCacheObject> | null = null;
-const isServer = typeof window === "undefined";
 
 type GetApolloClient = {
   serverCookies?: Record<string, string>;
   apolloState?: NormalizedCacheObject;
 };
-export function getApolloClient({
+export const getApolloClient = ({
   serverCookies,
   apolloState,
-}: GetApolloClient): ApolloClient<NormalizedCacheObject> {
-  if (isServer) {
+}: GetApolloClient): ApolloClient<NormalizedCacheObject> => {
+  if (typeof window === "undefined") {
     // 서버에서는 전역변수를 절대 활용하면 안됨. 동시성 이슈가 생길 수 있다.
     const serverClient = createApolloClient({
       cookies: serverCookies ?? {},
@@ -47,13 +46,17 @@ export function getApolloClient({
   }
 
   return CLIENT;
-}
+};
 
 /** ssr에서 fetch된 결과를 client에 hydrate하기 위해 필요한 함수 (in pages) */
 export const addApolloState = <T>(
   client: ApolloClient<NormalizedCacheObject>,
   pageProps: Record<string, T>
-) => {
+): {
+  props: T & {
+    __APOLLO_STATE__: NormalizedCacheObject;
+  };
+} => {
   const resultPageProps = {
     ...pageProps,
     props: {
@@ -65,11 +68,15 @@ export const addApolloState = <T>(
   return resultPageProps;
 };
 
+type UseApollo = {
+  pageProps: Record<string, any>;
+};
+
 export const useApollo = ({
   pageProps,
-}: {
-  pageProps: Record<string, any>;
-}) => {
+}: UseApollo): {
+  client: ApolloClient<NormalizedCacheObject>;
+} => {
   const state = pageProps?.[APOLLO_STATE_PROP_NAME];
 
   const client = useMemo(

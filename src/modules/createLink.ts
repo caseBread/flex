@@ -1,14 +1,13 @@
 import { onError } from "@apollo/client/link/error";
 import {
   ApolloLink,
+  FetchResult,
   HttpLink,
   Observable,
   ObservableSubscription,
 } from "@apollo/client";
-import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
-import { sha256 } from "crypto-hash";
-import { RefreshTokenAdapter } from "./refreshTokenAdapter";
 import { CLIENT_BASE_URL } from "@/constants/URL";
+import { RefreshTokenAdapter } from "./refreshTokenAdapter";
 
 const getRestoreAuthToken = async (): Promise<{
   accessToken: string;
@@ -47,57 +46,59 @@ export const createLink = ({
     refreshTokenFetcher: getRestoreAuthToken,
   });
 
-  const errorLink = onError(({ forward, operation, networkError }) => {
-    if (
-      networkError &&
-      "statusCode" in networkError &&
-      networkError.statusCode === 401
-    ) {
-      return new Observable((observer) => {
-        let subscription: ObservableSubscription;
+  const errorLink = onError(
+    ({ forward, operation, networkError }): Observable<FetchResult> | void => {
+      if (
+        networkError &&
+        "statusCode" in networkError &&
+        networkError.statusCode === 401
+      ) {
+        return new Observable((observer) => {
+          let subscription: ObservableSubscription;
 
-        void refreshTokenAdapter
-          .getRefreshedAccessToken()
-          .then(async (response) => {
-            operation.setContext({
-              headers: {
-                ...operation.getContext().headers,
-                Authorization: `Bearer ${response.accessToken}`,
-              },
-            });
-          })
-          .catch(async (err) => {
-            if (typeof window !== "undefined") {
-              // 로그인토큰을 쿠키에서 삭제
-              await fetch(`${clientBaseUrl}/api/tokens`, {
-                method: "DELETE",
+          void refreshTokenAdapter
+            .getRefreshedAccessToken()
+            .then(async (response) => {
+              operation.setContext({
                 headers: {
-                  "content-type": "application/json",
+                  ...operation.getContext().headers,
+                  Authorization: `Bearer ${response.accessToken}`,
                 },
               });
-            }
+            })
+            .catch(async (err) => {
+              if (typeof window !== "undefined") {
+                // 로그인토큰을 쿠키에서 삭제
+                await fetch(`${clientBaseUrl}/api/tokens`, {
+                  method: "DELETE",
+                  headers: {
+                    "content-type": "application/json",
+                  },
+                });
+              }
 
-            operation.setContext({
-              headers: {
-                ...operation.getContext().headers,
-                Authorization: ``,
-              },
+              operation.setContext({
+                headers: {
+                  ...operation.getContext().headers,
+                  Authorization: ``,
+                },
+              });
+            })
+            .finally(() => {
+              const subscriber = {
+                next: observer.next.bind(observer),
+                error: observer.error.bind(observer),
+                complete: observer.complete.bind(observer),
+              };
+
+              subscription = forward(operation).subscribe(subscriber);
             });
-          })
-          .finally(() => {
-            const subscriber = {
-              next: observer.next.bind(observer),
-              error: observer.error.bind(observer),
-              complete: observer.complete.bind(observer),
-            };
 
-            subscription = forward(operation).subscribe(subscriber);
-          });
-
-        return () => subscription.unsubscribe();
-      });
+          return () => subscription.unsubscribe();
+        });
+      }
     }
-  });
+  );
 
   const httpLink = new HttpLink({
     uri: `${apiBaseUrl}/api/graphql`,
