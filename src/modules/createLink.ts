@@ -110,10 +110,5 @@ export const createLink = ({
     },
   });
 
-  const persistedQueryLink = createPersistedQueryLink({
-    useGETForHashedQueries: true, // Q : 무슨코드? A : 네트워크비용 줄이기위해 쿼리를 해시로 바꾸는 코드다.
-    sha256: sha256,
-  });
-
-  return ApolloLink.from([persistedQueryLink, errorLink, httpLink]);
+  return ApolloLink.from([errorLink, httpLink]);
 };
