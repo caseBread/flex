@@ -6,27 +6,8 @@ import {
   Observable,
   ObservableSubscription,
 } from "@apollo/client";
-import { CLIENT_BASE_URL } from "@/constants/URL";
 import { RefreshTokenAdapter } from "./refreshTokenAdapter";
-
-const getRestoreAuthToken = async (): Promise<{
-  accessToken: string;
-}> => {
-  const response = await fetch(`${CLIENT_BASE_URL}/api/auth/refresh`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-  });
-
-  const { accessToken: newAccessToken } = await response.json();
-
-  if (!newAccessToken) {
-    throw new Error("로그아웃");
-  }
-
-  return { accessToken: newAccessToken };
-};
+import { getRestoreAuthToken } from "./getRestoreAuthToken";
 
 type CreateLink = {
   apiBaseUrl: string;

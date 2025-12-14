@@ -1,16 +1,20 @@
 import { AppProps } from "next/app";
-import { useApollo } from "../modules/apolloClient";
-import { ApolloProvider } from "@apollo/client";
+import {
+  HydrationBoundary,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { useState } from "react";
 
 const CustomApp = ({ Component, pageProps }: AppProps) => {
-  const { client: apolloClient } = useApollo({
-    pageProps,
-  });
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <ApolloProvider client={apolloClient}>
-      <Component {...pageProps} />
-    </ApolloProvider>
+    <QueryClientProvider client={queryClient}>
+      <HydrationBoundary state={pageProps.dehydratedState}>
+        <Component {...pageProps} />
+      </HydrationBoundary>
+    </QueryClientProvider>
   );
 };
 

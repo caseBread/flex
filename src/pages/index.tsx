@@ -35,37 +35,13 @@
  *      정상적으로 재발급(갱신)되는지 확인합니다.
  *
  */
-
 import { GetServerSideProps } from "next";
 import { getCommonServerSideProps } from "@/modules/serverSideProps";
 import { addApolloState } from "@/modules/apolloClient";
-import gql from "graphql-tag";
-import { useQuery } from "@apollo/client";
 import { CLIENT_BASE_URL } from "@/constants/URL";
-
-export const Q_IS_LOGINED = gql`
-  query GetIsLogined {
-    test {
-      isLogined
-    }
-  }
-`;
-
-export const Q_USER_ID = gql`
-  query GetUserId {
-    test {
-      userId
-    }
-  }
-`;
-
-export const Q_ROLE = gql`
-  query GetRole {
-    test {
-      role
-    }
-  }
-`;
+import { useIsLoginedQuery } from "@/hooks/useIsLoginedQuery";
+import { useRoleQuery } from "@/hooks/useRoleQuery";
+import { useUserIdQuery } from "@/hooks/useUserIdQuery";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { apolloClient } = await getCommonServerSideProps(ctx);
@@ -78,9 +54,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 };
 
 export default function Home() {
-  const testQuery1 = useQuery(Q_IS_LOGINED, { fetchPolicy: "no-cache" });
-  const testQuery2 = useQuery(Q_USER_ID, { fetchPolicy: "no-cache" });
-  const testQuery3 = useQuery(Q_ROLE, { fetchPolicy: "no-cache" });
+  const testQuery1 = useIsLoginedQuery();
+  const testQuery2 = useUserIdQuery();
+  const testQuery3 = useRoleQuery();
 
   const handleLogin = async (): Promise<void> => {
     await fetch(`${CLIENT_BASE_URL}/api/auth/login`, {
@@ -106,13 +82,13 @@ export default function Home() {
   };
 
   const loading =
-    testQuery1.loading || testQuery2.loading || testQuery3.loading;
+    testQuery1.isPending || testQuery2.isPending || testQuery3.isPending;
   const error = testQuery1.error || testQuery2.error || testQuery3.error;
 
   const test = {
-    isLogined: testQuery1.data?.test?.isLogined,
-    userId: testQuery2.data?.test?.userId,
-    role: testQuery3.data?.test?.role,
+    isLogined: testQuery1.data?.isLogined,
+    userId: testQuery2.data?.userId,
+    role: testQuery3.data?.role,
   };
 
   return (
