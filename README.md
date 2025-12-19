@@ -1,4 +1,4 @@
-# flex Engineering Internship Assignment: Frontend
+# flex Engineering Internship Assignment: Frontend!
 
 ## 로컬 실행 환경
 
